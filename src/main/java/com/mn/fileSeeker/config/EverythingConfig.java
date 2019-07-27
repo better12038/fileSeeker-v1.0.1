@@ -31,6 +31,10 @@ public class EverythingConfig {
     @Setter
     private Boolean orderByDesc = false;//默认降序
 
+    @Getter
+    @Setter
+    private Integer interval = 6000*10;//文件监控的间隔时间,默认10秒
+
     private EverythingConfig(){
 
     }

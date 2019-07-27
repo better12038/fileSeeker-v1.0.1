@@ -11,6 +11,8 @@ import com.mn.fileSeeker.core.interceptor.impl.FileIndexInterceptor;
 import com.mn.fileSeeker.core.interceptor.impl.FilePrintInterceptor;
 import com.mn.fileSeeker.core.model.Condition;
 import com.mn.fileSeeker.core.model.Thing;
+import com.mn.fileSeeker.core.monitor.FileMonitor;
+import com.mn.fileSeeker.core.monitor.impl.FileMonitorImpl;
 import com.mn.fileSeeker.core.search.ThingSearch;
 import com.mn.fileSeeker.core.search.impl.ThingSearchImpl;
 
@@ -36,6 +38,9 @@ public class EverythingManager {
     private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
 
     private EverythingConfig config = EverythingConfig.getInstance();
+
+    private FileMonitor fileMonitor;
+
     private EverythingManager(){
         this.fileScan = new FileScanImpl();
         this.fileIndexDao = new FileIndexDaoImpl(DataSourceFactory.getInstance());
@@ -43,6 +48,8 @@ public class EverythingManager {
         this.fileScan.interceptor(new FileIndexInterceptor(this.fileIndexDao));
 
         this.thingSearch = new ThingSearchImpl(this.fileIndexDao);
+
+        this.fileMonitor = new FileMonitorImpl(this.fileIndexDao);
     }
     public static EverythingManager getInstance(){
         if(manager == null){
@@ -96,6 +103,16 @@ public class EverythingManager {
     public void quit(){
         System.out.println("感谢您的使用，再见！");
         System.exit(0);
+    }
+    //文件监控
+    public void monitor(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                fileMonitor.monitor(config.getHandlerPath());
+                fileMonitor.start();
+            }
+        }).start();
     }
 
 }
